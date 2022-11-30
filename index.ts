@@ -51,13 +51,19 @@ async function main() {
         console.log(
           `photo with id = ${r.id} is not found and should be updated`
         );
-        continue;
+
+        updateQuery +=
+          `update HotelPhotos set TopLeftX = ${0}, ` +
+          `TopLeftY = ${0}, ` +
+          `BottomRightX = ${0}, ` +
+          `BottomRightY = ${0} where id = ${r.id}; `;
+      } else {
+        updateQuery +=
+          `update HotelPhotos set TopLeftX = ${r.result.x}, ` +
+          `TopLeftY = ${r.result.y}, ` +
+          `BottomRightX = ${r.result.x + r.result.width}, ` +
+          `BottomRightY = ${r.result.y + r.result.height} where id = ${r.id}; `;
       }
-      updateQuery +=
-        `update HotelPhotos set TopLeftX = ${r.result.x}, ` +
-        `TopLeftY = ${r.result.y}, ` +
-        `BottomRightX = ${r.result.x + r.result.width}, ` +
-        `BottomRightY = ${r.result.y + r.result.height} where id = ${r.id}; `;
     }
     await sql.query(updateQuery);
   }
