@@ -12,11 +12,14 @@ const URL_PREFIX = "https://s.mrbilit.com/mrhotel/";
 async function getSmartCrop(id: number, photo: string): Promise<CropResult> {
   const fileBuffer = (await (
     await axios({
-      url: URL_PREFIX + photo,
+      baseURL: URL_PREFIX,
+      url: photo,
       responseType: "arraybuffer",
       maxContentLength: 1024 * 1024 * 20,
     })
   ).data) as Buffer;
+
+  if (fileBuffer.length == 0) return new CropResult(id, null);
 
   const crop = (
     await smartcrop.crop(fileBuffer, {
@@ -42,13 +45,20 @@ async function main() {
     const result = await Promise.all(crops);
 
     var updateQuery = "";
-    result.forEach((r) => {
+
+    for (var r of result) {
+      if (r.result == null) {
+        console.log(
+          `photo with id = ${r.id} is not found and should be updated`
+        );
+        continue;
+      }
       updateQuery +=
         `update HotelPhotos set TopLeftX = ${r.result.x}, ` +
         `TopLeftY = ${r.result.y}, ` +
         `BottomRightX = ${r.result.x + r.result.width}, ` +
         `BottomRightY = ${r.result.y + r.result.height} where id = ${r.id}; `;
-    });
+    }
     await sql.query(updateQuery);
   }
 }
