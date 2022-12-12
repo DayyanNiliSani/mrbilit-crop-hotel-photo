@@ -10,25 +10,29 @@ const HEIGHT = 378;
 const URL_PREFIX = "https://s.mrbilit.com/mrhotel/";
 
 async function getSmartCrop(id: number, photo: string): Promise<CropResult> {
-  const fileBuffer = (await (
-    await axios({
-      baseURL: URL_PREFIX,
-      url: photo,
-      responseType: "arraybuffer",
-      maxContentLength: 1024 * 1024 * 20,
-    })
-  ).data) as Buffer;
+  try {
+    const fileBuffer = (await (
+      await axios({
+        baseURL: URL_PREFIX,
+        url: photo,
+        responseType: "arraybuffer",
+        maxContentLength: 1024 * 1024 * 20,
+      })
+    ).data) as Buffer;
 
-  if (fileBuffer.length == 0) return new CropResult(id, null);
+    if (fileBuffer.length == 0) return new CropResult(id, null);
 
-  const crop = (
-    await smartcrop.crop(fileBuffer, {
-      width: WIDTH,
-      height: HEIGHT,
-    } as any)
-  ).topCrop;
+    const crop = (
+      await smartcrop.crop(fileBuffer, {
+        width: WIDTH,
+        height: HEIGHT,
+      } as any)
+    ).topCrop;
 
-  return new CropResult(id, crop);
+    return new CropResult(id, crop);
+  } catch (exp) {
+    return new CropResult(id, null);
+  }
 }
 
 async function main() {
